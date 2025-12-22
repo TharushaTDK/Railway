@@ -31,6 +31,14 @@ const initDB = async () => {
         created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
       );
     `);
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS ${(0, exports.table)("contacts")} (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+      );
+    `);
     }
     catch (err) {
         console.error("Failed to initialize database:", err);

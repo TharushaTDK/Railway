@@ -9,7 +9,7 @@
     "build:client": "vite build",
     "build:server": "tsc -p server/tsconfig.json",
     "start": "node server/dist/index.js",
-    "typecheck": "tsc -p server/tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json --noEmit"
   },
   "engines": {
     "node": ">=18"

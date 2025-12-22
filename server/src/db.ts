@@ -43,6 +43,7 @@ export const initDB = async () => {
       );
     `
     );
+    console.log("✅ Database connected and initialized");
   } catch (err) {
     console.error("Failed to initialize database:", err);
   }

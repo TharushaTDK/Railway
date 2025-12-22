@@ -19,6 +19,11 @@ const PORT = (() => {
     throw new Error("PORT not set");
 })();
 app.use(express_1.default.json());
+// Request logger to debug routes
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
 const corsOrigin = process.env.CORS_ORIGIN;
 if (corsOrigin) {
     app.use((0, cors_1.default)({ origin: corsOrigin }));
@@ -28,6 +33,39 @@ else if (isDev) {
 }
 app.get("/api/health", (_req, res) => {
     res.json({ ok: true, env: process.env.NODE_ENV || "development" });
+});
+app.get("/api/contacts", async (_req, res) => {
+    const pool = (0, db_1.getPool)();
+    if (!pool) {
+        res.status(503).json({ error: "Database not configured. Set DATABASE_URL." });
+        return;
+    }
+    try {
+        const result = await pool.query(`SELECT id, name, email, created_at FROM ${(0, db_1.table)("contacts")} ORDER BY id DESC`);
+        res.json(result.rows);
+    }
+    catch {
+        res.status(500).json({ error: "Failed to fetch contacts" });
+    }
+});
+app.post("/api/contacts", async (req, res) => {
+    const pool = (0, db_1.getPool)();
+    if (!pool) {
+        res.status(503).json({ error: "Database not configured. Set DATABASE_URL." });
+        return;
+    }
+    const { name, email } = req.body;
+    if (!name || typeof name !== "string" || !email || typeof email !== "string") {
+        res.status(400).json({ error: "name and email are required" });
+        return;
+    }
+    try {
+        const result = await pool.query(`INSERT INTO ${(0, db_1.table)("contacts")} (name, email) VALUES ($1, $2) RETURNING id, name, email, created_at`, [name, email]);
+        res.status(201).json(result.rows[0]);
+    }
+    catch {
+        res.status(500).json({ error: "Failed to create contact" });
+    }
 });
 app.get("/api/todos", async (_req, res) => {
     const pool = (0, db_1.getPool)();

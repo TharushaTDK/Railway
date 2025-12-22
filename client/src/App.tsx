@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+// Configure API base URL for Production vs Development
+// In Dev, Vite proxies /api to localhost:8080
+// In Prod, we can use relative path (if same domain) or absolute URL via env var
+const API_BASE = import.meta.env.DEV
+  ? "/api"
+  : (import.meta.env.VITE_API_URL || "/api");
 
 type Todo = { id: number; title: string; completed: boolean; created_at: string };
 type Contact = { id: number; name: string; email: string; created_at: string };
@@ -12,7 +19,7 @@ export default function App() {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    fetch("/api/health")
+    fetch(`${API_BASE}/health`)
       .then((r) => r.json())
       .then((h) => setStatus(`Backend: OK (${h.env})`))
       .catch(() => setStatus("Backend unreachable"));
@@ -22,7 +29,7 @@ export default function App() {
 
   const loadTodos = async () => {
     try {
-      const r = await fetch("/api/todos");
+      const r = await fetch(`${API_BASE}/todos`);
       if (!r.ok) {
         const err = await r.json();
         setStatus(err.error || "Error");
@@ -37,7 +44,7 @@ export default function App() {
 
   const loadContacts = async () => {
     try {
-      const r = await fetch("/api/contacts");
+      const r = await fetch(`${API_BASE}/contacts`);
       if (!r.ok) return;
       const data: Contact[] = await r.json();
       setContacts(data);
@@ -46,7 +53,7 @@ export default function App() {
 
   const addTodo = async () => {
     if (!title.trim()) return;
-    const r = await fetch("/api/todos", {
+    const r = await fetch(`${API_BASE}/todos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title }),
@@ -61,7 +68,7 @@ export default function App() {
   };
 
   const toggleTodo = async (id: number, completed: boolean) => {
-    const r = await fetch(`/api/todos/${id}`, {
+    const r = await fetch(`${API_BASE}/todos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ completed: !completed }),
@@ -70,7 +77,7 @@ export default function App() {
   };
 
   const deleteTodo = async (id: number) => {
-    const r = await fetch(`/api/todos/${id}`, { method: "DELETE" });
+    const r = await fetch(`${API_BASE}/todos/${id}`, { method: "DELETE" });
     if (r.ok) loadTodos();
   };
 
@@ -124,7 +131,7 @@ export default function App() {
         <button
           onClick={async () => {
             if (!name.trim() || !email.trim()) return;
-            const r = await fetch("/api/contacts", {
+            const r = await fetch(`${API_BASE}/contacts`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ name, email }),

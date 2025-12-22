@@ -1,7 +1,7 @@
 const { Client } = require("pg");
 
 async function main() {
-  const host = process.env.PGHOST;
+  const host = process.env.PGHOST ;
   const port = Number(process.env.PGPORT);
   const user = process.env.PGUSER;
   const password = process.env.PGPASSWORD;
